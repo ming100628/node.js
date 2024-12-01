@@ -4,7 +4,7 @@ var os = require("os");
 const hostname = "127.0.0.1";
 const port = 3000;
 
-async function getAllFileNames() {
+function getAllFileNames() {
   return fs.readdirSync("./public/");
 }
 
@@ -25,24 +25,16 @@ const server = createServer(async (req, res) => {
       res.end();
     });
   } else {
-    var fileNames = await getAllFileNames();
-    var foundFile = false;
-    fileNames.forEach(async (file) => {
-      if (req.url.substring(1, req.url.length - 1) == file) {
-        const fileContent = getFileData(`./public/${file}`);
-        console.log(fileContent);
-        res.write(fileContent);
-        foundFile = true;
-        res.end();
-      }
-    });
-    if (!foundFile) {
+    var fileNames = getAllFileNames();
+    const urlFileName = req.url.substring(1, req.url.length - 1);
+    if (fileNames.some((fileName) => urlFileName === fileName)) {
+      const fileContent = getFileData(`./public/${urlFileName}`);
+      res.write(fileContent);
+    } else {
       res.statusCode = 404;
-      res.end();
     }
+    res.end();
   }
-  // res.end(s);
-  // res.end(`${new Date()}`);
 });
 
 server.listen(port, hostname, () => {
