@@ -1,6 +1,5 @@
 const { createServer } = require("node:http");
 var fs = require("fs");
-var os = require("os");
 const hostname = "127.0.0.1";
 const port = 3000;
 
@@ -29,6 +28,8 @@ const server = createServer(async (req, res) => {
     const urlFileName = req.url.substring(1, req.url.length - 1);
     if (fileNames.some((fileName) => urlFileName === fileName)) {
       const fileContent = getFileData(`./public/${urlFileName}`);
+      res.setHeader("Content-Type", "application/download");
+      res.setHeader("Content-Disposition", `filename=${urlFileName}`);
       res.write(fileContent);
     } else {
       res.statusCode = 404;
