@@ -1,5 +1,7 @@
-const { createServer } = require("node:http");
-var fs = require("fs");
+import { createServer } from "node:http";
+
+import fs from "fs";
+import obj from "./routes.js";
 const hostname = "127.0.0.1";
 const port = 3000;
 
@@ -13,6 +15,7 @@ function getFileData(filepath) {
 
 const server = createServer(async (req, res) => {
   var s = "";
+  console.log(obj);
   if (req.url === "/") {
     res.statusCode = 200;
     res.setHeader("Content-Type", "text/html");
@@ -23,6 +26,10 @@ const server = createServer(async (req, res) => {
       });
       res.end();
     });
+  } else if (obj[req.url]) {
+    const fileContent = getFileData(`./views/${obj[req.url]}`);
+    res.write(fileContent);
+    res.end();
   } else {
     var fileNames = getAllFileNames();
     const urlFileName = req.url.substring(1, req.url.length - 1);
