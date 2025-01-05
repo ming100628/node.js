@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 
 import fs from "fs";
 import obj from "./routes.js";
+import f from "./views/christmas.html.js";
 const hostname = "127.0.0.1";
 const port = 3000;
 
@@ -26,6 +27,10 @@ const server = createServer(async (req, res) => {
       });
       res.end();
     });
+  } else if (req.url == "/3333") {
+    res.setHeader("Content-Type", "text/html");
+    res.write(f());
+    res.end();
   } else if (obj[req.url]) {
     const fileContent = getFileData(`./views/${obj[req.url]}`);
     res.write(fileContent);
