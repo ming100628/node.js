@@ -2,10 +2,9 @@ import { createServer } from "node:http";
 
 import fs from "fs";
 import obj from "./routes.js";
-import f from "./views/christmas.html.js";
 const hostname = "127.0.0.1";
 const port = 3000;
-
+import { createDb, incrementCounter } from "./db.js";
 function getAllFileNames() {
   return fs.readdirSync("./public/");
 }
@@ -15,8 +14,12 @@ function getFileData(filepath) {
 }
 
 const server = createServer(async (req, res) => {
+  console.log(req.url);
   var s = "";
-  console.log(obj);
+  const db = await createDb();
+  await incrementCounter();
+  let counter = await db.all("SELECT visit from counter LIMIT 1");
+
   if (req.url === "/") {
     res.statusCode = 200;
     res.setHeader("Content-Type", "text/html");
@@ -25,6 +28,7 @@ const server = createServer(async (req, res) => {
         res.write(`<a href="/${file}/">${file}</a>`);
         res.write("<br/>");
       });
+      res.write(`visitors: ${counter[0].visit}`);
       res.end();
     });
   } else if (req.url == "/3333") {
@@ -32,8 +36,12 @@ const server = createServer(async (req, res) => {
     res.write(f());
     res.end();
   } else if (obj[req.url]) {
-    const fileContent = getFileData(`./views/${obj[req.url]}`);
-    res.write(fileContent);
+    res.setHeader("Content-Type", "text/html");
+    // const fileContent = getFileData(`./views/${obj[req.url]}`);
+    const f = await import(`./views/${obj[req.url]}`);
+    console.log(f);
+    res.write(f.default());
+    res.write(`${counter[0].visit}`);
     res.end();
   } else {
     var fileNames = getAllFileNames();
