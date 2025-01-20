@@ -4,7 +4,7 @@ import fs from "fs";
 import obj from "./routes.js";
 const hostname = "127.0.0.1";
 const port = 3000;
-import { createDb, incrementCounter } from "./db.js";
+import { getComments, createDb, incrementCounter } from "./db.js";
 function getAllFileNames() {
   return fs.readdirSync("./public/");
 }
@@ -31,6 +31,15 @@ const server = createServer(async (req, res) => {
       res.write(`visitors: ${counter[0].visit}`);
       res.end();
     });
+  } else if (req.url === "/comments") {
+    res.setHeader("Content-Type", "text/html");
+    var comments = await getComments();
+    for (let i = 0; i < comments.length; i++) {
+      const comment = comments[i];
+      res.write(`<div>${comment.content}</div>`);
+    }
+
+    res.end();
   } else if (req.url == "/3333") {
     res.setHeader("Content-Type", "text/html");
     res.write(f());
