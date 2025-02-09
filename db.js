@@ -17,6 +17,11 @@ export async function incrementCounter() {
   );
 }
 
+export async function createComments(comment) {
+  const db = await createDb();
+  await db.run(`INSERT INTO comments(content) VALUES(?)`, comment);
+}
+
 export async function migrateCounter() {
   const db = await createDb();
   await db.exec("CREATE TABLE counter (visit INT)");
@@ -24,7 +29,8 @@ export async function migrateCounter() {
 
 export async function migrateComments() {
   const db = await createDb();
-  await db.exec("CREATE TABLE comments (content STRING)");
+  await db.exec("DROP TABLE comments");
+  await db.exec("CREATE TABLE comments (content TEXT)");
 }
 
 export async function getComments() {
