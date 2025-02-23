@@ -10,6 +10,7 @@ import {
   createDb,
   incrementCounter,
   createComments,
+  deleteComments,
 } from "./db.js";
 function getAllFileNames() {
   return fs.readdirSync("./public/");
@@ -25,9 +26,16 @@ const server = createServer(async (req, res) => {
   const db = await createDb();
   await incrementCounter();
   let counter = await db.all("SELECT visit from counter LIMIT 1");
-  // console.log(req);
-  console.log(req.method);
-  if (req.method === "GET") {
+
+  if (req.method === "DELETE") {
+    if (req.url.startsWith("/comments")) {
+      const qwerty = req.url.split("="); 
+      const id = qwerty[qwerty.length-1];
+      deleteComments(id);
+      res.end();
+    }
+  }
+  else if (req.method === "GET") {
     if (req.url === "/") {
       res.statusCode = 200;
       res.setHeader("Content-Type", "text/html");
@@ -39,7 +47,8 @@ const server = createServer(async (req, res) => {
         res.write(`visitors: ${counter[0].visit}`);
         res.end();
       });
-    } else if (req.url === "/comments") {
+    } else if (req.url.startsWith("/comments")) {
+      console.log(req.url.split('/'))
       res.setHeader("Content-Type", "text/html");
       res.write(
         "<form action='/comments' method='post'><input name='comment' type='text' /><button>Submit</button></form>"
@@ -47,7 +56,8 @@ const server = createServer(async (req, res) => {
       var comments = await getComments();
       for (let i = 0; i < comments.length; i++) {
         const comment = comments[i];
-        res.write(`<div>${comment.content}</div>`);
+        console.log(comment)
+        res.write(`<div>${comment.content}<button id="${comment.id}" onClick="fetch('/comments?id=${comment.id}', {method: 'DELETE'}).then(()=> window.location.reload())">delete</button><a href='/comments/${comment.id}/edit'>edit</a></div>`);
       }
 
       res.end();
